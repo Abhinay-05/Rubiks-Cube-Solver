@@ -1,7 +1,7 @@
 package model;
 
-import parser.AlgorithmParser;
-import util.Scrambler;
+import algorithm.AlgorithmParser;
+import algorithm.Scrambler;
 
 public class Cube {
     //    6 faces of the Cube

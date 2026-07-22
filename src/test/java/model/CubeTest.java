@@ -1,7 +1,8 @@
 package model;
 
 import org.junit.jupiter.api.Test;
-import util.Scrambler;
+import algorithm.Algorithm;
+import algorithm.Scrambler;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -190,7 +191,6 @@ class CubeTest {
 
     @Test
     void generatedScrambleHas20Moves() {
-
         String scramble = Scrambler.generate();
 
         assertEquals(20,
@@ -199,9 +199,23 @@ class CubeTest {
 
     @Test
     void generatedScrambleShouldParse() {
-
         Cube cube = new Cube();
+        cube.applyAlgorithm(Scrambler.generate());//20 moves
+        cube.printCube();
+    }
 
-        cube.applyAlgorithm(Scrambler.generate());
+    @Test
+    void generateInvert() {
+        String scrambled = Scrambler.generate();
+        System.out.println(scrambled);
+        System.out.println(Algorithm.invert(scrambled));
+    }
+
+    @Test
+    void checkNormalize(){
+        String scrambled = Algorithm.random(20);
+        System.out.println(scrambled);
+        String normalized = Algorithm.normalize(scrambled);
+        System.out.println(normalized);
     }
 }

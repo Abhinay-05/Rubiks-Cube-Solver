@@ -1,9 +1,4 @@
-package util;
-
-import model.Moves;
-
-import java.util.ArrayList;
-import java.util.List;
+package algorithm;
 
 public class Scrambler {
     static String[] moves = {"U", "U'", "U2", "F", "F'", "F2", "L", "L'", "L2", "R", "R'", "R2", "B", "B'", "B2", "D", "D'", "D2"};
