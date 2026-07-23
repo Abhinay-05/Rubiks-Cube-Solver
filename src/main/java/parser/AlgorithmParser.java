@@ -1,4 +1,4 @@
-package algorithm;
+package parser;
 
 import model.Moves;
 

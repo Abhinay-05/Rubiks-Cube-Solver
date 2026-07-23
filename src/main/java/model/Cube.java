@@ -1,7 +1,10 @@
 package model;
 
-import algorithm.AlgorithmParser;
-import algorithm.Scrambler;
+import parser.AlgorithmParser;
+import util.Scrambler;
+
+import java.util.HashSet;
+import java.util.Objects;
 
 public class Cube {
     //    6 faces of the Cube
@@ -12,6 +15,8 @@ public class Cube {
     private Face left;
     private Face right;
 
+    HashSet<Cube> visited = new HashSet<>();
+
     //    Ideal Cube
     public Cube(){
         up = new Face(Colour.WHITE);
@@ -20,6 +25,43 @@ public class Cube {
         back = new Face(Colour.ORANGE);
         left = new Face(Colour.GREEN);
         right = new Face(Colour.BLUE);
+    }
+
+    public Cube(Cube other) {
+        this.up = new Face(other.up);
+        this.down = new Face(other.down);
+        this.left = new Face(other.left);
+        this.right = new Face(other.right);
+        this.front = new Face(other.front);
+        this.back = new Face(other.back);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+
+        if (!(obj instanceof Cube other))
+            return false;
+
+        return up.equals(other.up)
+                && down.equals(other.down)
+                && left.equals(other.left)
+                && right.equals(other.right)
+                && front.equals(other.front)
+                && back.equals(other.back);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+                up,
+                down,
+                left,
+                right,
+                front,
+                back
+        );
     }
 
     //    Check if the cube is valid

@@ -1,8 +1,8 @@
-package algorithm;
+package util;
 
 import model.Moves;
+import parser.AlgorithmParser;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class Algorithm {
@@ -60,8 +60,51 @@ public class Algorithm {
             int i=0;
             int len = tokens.length;
             while (i < len){
-                char currentFace = tokens[i].charAt(0);
+                char currentFace = face(tokens[i]);
+
+                int rotation = 0;
+//                compute moves of the same face that appear consecutively
+                while(i < len && face(tokens[i]) == currentFace){
+                    rotation += amount(tokens[i]);
+                    i++;
+                }
+//                  calculate the final move
+                String normalizedMove = makeMove(currentFace, rotation);
+//                  add move in Normalized String
+                if(!normalizedMove.isEmpty()){
+                    if(!normalized.isEmpty()){
+                        normalized.append(" ");
+                    }
+                    normalized.append(normalizedMove);
+                }
             }
+
+            return normalized.toString();
+        }
+//        returns face of the current move
+        private static char face(String move) {
+            return move.charAt(0);
+        }
+//        return cardinality of the current move
+        private static int amount(String move) {
+            if(move.endsWith("2"))//F2
+                return 2;
+
+            if(move.endsWith("'"))//F'
+                return 3;
+
+            return 1;//F
+        }
+        private static String makeMove(char face, int rotation){
+            rotation %= 4;
+
+            return switch (rotation){
+                case 0 -> "";//no move
+                case 1 -> String.valueOf(face);//R
+                case 2 -> face + "2";//R2
+                case 3 -> face + "'";//R3 -> R'
+                default -> throw new IllegalStateException();
+            };
         }
 
 

@@ -1,8 +1,8 @@
 package model;
 
 import org.junit.jupiter.api.Test;
-import algorithm.Algorithm;
-import algorithm.Scrambler;
+import util.Algorithm;
+import util.Scrambler;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -218,4 +218,35 @@ class CubeTest {
         String normalized = Algorithm.normalize(scrambled);
         System.out.println(normalized);
     }
+
+    @Test
+    void ScrambleThenInverseShouldSolve(){
+        boolean ans = true;
+        for(int i=0; i<1000; i++){
+            if(!ScrambleThenInverseShouldSolve1()){
+                ans = false;
+                break;
+            }
+        }
+        assertTrue(ans);
+    }
+    boolean ScrambleThenInverseShouldSolve1() {
+        Cube cube = new Cube();
+
+        String scramble = Scrambler.generate();
+        cube.applyAlgorithm(scramble);
+        cube.applyAlgorithm(Algorithm.invert(scramble));
+
+        return cube.isSolved();
+    }
+
+    @Test
+    void copyIsEqualToOriginal(){
+        Cube cube = new Cube();
+        Cube cube1 = new Cube(cube);
+
+        assertTrue(cube.equals(cube1));
+    }
+
+
 }

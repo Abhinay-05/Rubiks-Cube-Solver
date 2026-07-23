@@ -14,6 +14,14 @@ public class Face {
         }
     }
 
+    public Face(Face other) {
+        face = new Colour[3][3];
+
+        for (int i = 0; i < 3; i++) {
+            System.arraycopy(other.face[i], 0, face[i], 0, 3);
+        }
+    }
+
     //    return colour of a sticker
     public Colour getColour(int row, int col){
         return face[row][col];
@@ -34,6 +42,12 @@ public class Face {
             }
         }
         return copyFace;
+    }
+
+    public void setFace(Face face){
+        for(int i=0; i<SIZE; i++){
+            this.setRow(i, face.getRow(i));
+        }
     }
 
     //    return a particular row
@@ -149,5 +163,24 @@ public class Face {
             System.out.print(Arrays.toString(fc));
         }
     }
+
+    @Override
+    public boolean equals(Object obj) {
+
+        if (this == obj)
+            return true;
+
+        if (!(obj instanceof Face other))
+            return false;
+
+        return Arrays.deepEquals(face, other.face);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.deepHashCode(face);
+    }
+
+
 }
 
