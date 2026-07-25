@@ -1,8 +1,11 @@
 package model;
 
 import org.junit.jupiter.api.Test;
+import parser.AlgorithmParser;
 import util.Algorithm;
 import util.Scrambler;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -248,5 +251,217 @@ class CubeTest {
         assertTrue(cube.equals(cube1));
     }
 
+    @Test
+    void modifyingCopyShouldNotModifyOriginal() {
+        Cube cube = new Cube();
 
+        Cube copy = new Cube(cube);
+
+        copy.applyMove(Moves.R);
+
+        assertNotEquals(cube, copy);
+        assertTrue(cube.isSolved());
+    }
+
+    @Test
+    void cubeEqualsItself() {
+        Cube cube = new Cube();
+
+        assertEquals(cube, cube);
+    }
+
+    @Test
+    void equalsShouldBeSymmetric() {
+        Cube cube1 = new Cube();
+        Cube cube2 = new Cube(cube1);
+
+        assertEquals(cube1, cube2);
+        assertEquals(cube2, cube1);
+    }
+
+    @Test
+    void equalCubesShouldHaveSameHashCode() {
+        Cube cube1 = new Cube();
+        Cube cube2 = new Cube(cube1);
+
+        assertEquals(cube1.hashCode(), cube2.hashCode());
+    }
+
+    @Test
+    void everyMoveShouldUndoWithInverse() {
+
+        String[] algorithms = {
+                "R R'",
+                "L L'",
+                "U U'",
+                "D D'",
+                "F F'",
+                "B B'"
+        };
+
+        for (String algorithm : algorithms) {
+
+            Cube cube = new Cube();
+
+            cube.applyAlgorithm(algorithm);
+
+            assertTrue(cube.isSolved());
+        }
+    }
+
+    @Test
+    void inverseThenMoveShouldSolve() {
+
+        String[] algorithms = {
+                "R' R",
+                "L' L",
+                "U' U",
+                "D' D",
+                "F' F",
+                "B' B"
+        };
+
+        for (String algorithm : algorithms) {
+
+            Cube cube = new Cube();
+
+            cube.applyAlgorithm(algorithm);
+
+            assertTrue(cube.isSolved());
+        }
+    }
+
+    @Test
+    void fourQuarterTurnsShouldSolve() {
+
+        String[] algorithms = {
+                "R R R R",
+                "L L L L",
+                "U U U U",
+                "D D D D",
+                "F F F F",
+                "B B B B"
+        };
+
+        for (String algorithm : algorithms) {
+
+            Cube cube = new Cube();
+
+            cube.applyAlgorithm(algorithm);
+
+            assertTrue(cube.isSolved());
+        }
+    }
+
+    @Test
+    void twoHalfTurnsShouldSolve() {
+
+        String[] algorithms = {
+                "R2 R2",
+                "L2 L2",
+                "U2 U2",
+                "D2 D2",
+                "F2 F2",
+                "B2 B2"
+        };
+
+        for (String algorithm : algorithms) {
+
+            Cube cube = new Cube();
+
+            cube.applyAlgorithm(algorithm);
+
+            assertTrue(cube.isSolved());
+        }
+    }
+
+    @Test
+    void algorithmFollowedByInverseShouldSolve() {
+
+        String algorithm = "R U R' U' F R2 D";
+
+        Cube cube = new Cube();
+
+        cube.applyAlgorithm(algorithm);
+        cube.applyAlgorithm(Algorithm.invert(algorithm));
+
+        assertTrue(cube.isSolved());
+    }
+
+    @Test
+    void randomScrambleShouldUndo() {
+
+        for (int i = 0; i < 100; i++) {
+
+            Cube cube = new Cube();
+
+            String scramble = Scrambler.generate();
+
+            cube.applyAlgorithm(scramble);
+            cube.applyAlgorithm(Algorithm.invert(scramble));
+
+            assertTrue(cube.isSolved());
+        }
+    }
+
+    @Test
+    void parserShouldProduceCorrectMoveCount() {
+
+        List<Moves> moves = AlgorithmParser.parse("R U R' U'");
+
+        assertEquals(4, moves.size());
+    }
+
+    @Test
+    void validateShouldAcceptValidAlgorithm() {
+
+        assertTrue(
+                Algorithm.validate("R U R' U'")
+        );
+    }
+
+    @Test
+    void validateShouldRejectInvalidAlgorithm() {
+
+        assertFalse(
+                Algorithm.validate("R X Y")
+        );
+    }
+
+    @Test
+    void multipleCopiesShouldRemainEqual() {
+
+        Cube cube = new Cube();
+
+        Cube copy1 = new Cube(cube);
+        Cube copy2 = new Cube(copy1);
+
+        assertEquals(cube, copy2);
+    }
+
+    @Test
+    void cubesShouldNotBeEqualAfterMove() {
+
+        Cube cube1 = new Cube();
+        Cube cube2 = new Cube();
+
+        cube2.applyMove(Moves.R);
+
+        assertNotEquals(cube1, cube2);
+    }
+
+    @Test
+    void applyAlgorithmShouldMatchIndividualMoves() {
+
+        Cube cube1 = new Cube();
+        Cube cube2 = new Cube();
+
+        cube1.applyAlgorithm("R U F");
+
+        cube2.applyMove(Moves.R);
+        cube2.applyMove(Moves.U);
+        cube2.applyMove(Moves.F);
+
+        assertEquals(cube1, cube2);
+    }
 }
