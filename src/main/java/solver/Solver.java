@@ -1,4 +1,7 @@
 package solver;
 
-public class Solver {
+import model.Cube;
+
+public interface Solver {
+    String solve(Cube cube);
 }

@@ -27,6 +27,38 @@ public class Cube {
         right = new Face(Colour.BLUE);
     }
 
+    // Create a Cube from six existing faces
+    public Cube(Face up, Face right, Face front,
+                Face down, Face left, Face back) {
+
+        this.up = copyFace(up);
+        this.right = copyFace(right);
+        this.front = copyFace(front);
+        this.down = copyFace(down);
+        this.left = copyFace(left);
+        this.back = copyFace(back);
+    }
+
+    // Make a copy of a Face
+    private Face copyFace(Face original) {
+        Face copy = new Face(original.getColour(1, 1));
+
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 3; col++) {
+                copy.setColour(row, col, original.getColour(row, col));
+            }
+        }
+
+        return copy;
+    }
+
+    public Face getUp() { return up; }
+    public Face getDown() { return down; }
+    public Face getFront() { return front; }
+    public Face getBack() { return back; }
+    public Face getLeft() { return left; }
+    public Face getRight() { return right; }
+
     public Cube(Cube other) {
         this.up = new Face(other.up);
         this.down = new Face(other.down);
