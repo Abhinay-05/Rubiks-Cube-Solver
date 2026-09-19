@@ -1,4 +1,4 @@
-# Rubiks-Cube-Solver
+
 # Rubik's Cube Solver
 
 A modular Java-based 3×3 Rubik's Cube solver that models the cube at sticker level, supports standard cube notation and scrambling, provides an educational IDA* search implementation, and integrates a Kociemba-style two-phase solver for practical solving performance.
