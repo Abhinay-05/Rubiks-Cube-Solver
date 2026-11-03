@@ -5,7 +5,10 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = {
+    "http://localhost:5173",
+    "https://YOUR-VERCEL-DOMAIN.vercel.app"
+})
 public class CubeController {
 
     private final CubeService cubeService;
