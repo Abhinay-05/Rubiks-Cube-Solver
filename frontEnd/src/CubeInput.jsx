@@ -29,7 +29,12 @@ const SOLVED_CUBE = {
   back: Array(9).fill("O"),
 };
 
-const API = "http://localhost:8080/api";
+// Use the deployed backend in production.
+// Fall back to localhost during local development.
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+
+const API = `${API_BASE_URL.replace(/\/$/, "")}/api`;
 
 function copySolvedCube() {
   return Object.fromEntries(
@@ -135,7 +140,7 @@ export default function CubeInput({ onResult, onFacesChange }) {
     } catch (err) {
       setError(
         err.message === "Failed to fetch"
-          ? "Cannot connect to the Java backend."
+          ? "Cannot connect to the Java backend. Please try again."
           : err.message
       );
     } finally {
