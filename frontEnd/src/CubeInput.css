@@ -1,0 +1,194 @@
+/* =========================
+   MANUAL CUBE EDITOR
+========================= */
+
+.manual-editor {
+  width: 100%;
+}
+
+/* Face selection tabs */
+
+.face-tabs {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+  margin: 18px 0;
+}
+
+.control-panel .face-tab {
+  min-width: 0;
+  min-height: 40px;
+  margin: 0;
+  padding: 7px 4px;
+  color: #cbd5e1;
+  background: #1b1e29;
+  border: 1px solid #383d4c;
+  border-radius: 8px;
+  font-size: 11px;
+}
+
+.control-panel .face-tab:hover {
+  border-color: #a78bfa;
+}
+
+.control-panel .face-tab.active {
+  color: #171323;
+  background: #a78bfa;
+  border-color: #a78bfa;
+}
+
+/* Face heading */
+
+.editor-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.editor-heading h3 {
+  margin: 0;
+  color: #f3f4f6;
+  font-size: 15px;
+}
+
+.editor-heading span {
+  color: #9ca3af;
+  font-size: 11px;
+}
+
+/* 3x3 sticker grid */
+
+.sticker-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: min(100%, 240px);
+  margin: 0 auto;
+  padding: 12px;
+  border: 1px solid #383d4c;
+  border-radius: 10px;
+  background: #0b0d12;
+}
+
+.control-panel .sticker {
+  width: 100%;
+  aspect-ratio: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 2px solid #343849;
+  border-radius: 8px;
+  transition: transform 0.12s ease, border-color 0.12s ease;
+}
+
+.control-panel .sticker:not(:disabled):hover {
+  transform: scale(1.06);
+  border-color: #a78bfa;
+}
+
+.control-panel .sticker:disabled {
+  cursor: not-allowed;
+  opacity: 1;
+  border-color: #ffffff;
+}
+
+/* Color selection */
+
+.editor-label {
+  margin: 18px 0 10px;
+  color: #cbd5e1;
+  font-size: 12px;
+}
+
+.color-palette {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.control-panel .palette-color {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  min-width: 0;
+  min-height: 40px;
+  margin: 0;
+  padding: 8px;
+  color: #e5e7eb;
+  background: #1b1e29;
+  border: 1px solid #383d4c;
+  border-radius: 8px;
+  font-size: 11px;
+}
+
+.control-panel .palette-color:hover {
+  border-color: #a78bfa;
+}
+
+.control-panel .palette-color.selected {
+  border-color: #a78bfa;
+  background: #252238;
+}
+
+.palette-color span {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  border: 1px solid #ffffff30;
+}
+
+/* Reset and solve buttons */
+
+.editor-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.control-panel .editor-actions button {
+  flex: 1;
+  width: 50%;
+  min-width: 0;
+  margin: 0;
+  padding: 10px 7px;
+  font-size: 12px;
+}
+
+/* Error message */
+
+.manual-editor .error {
+  margin-top: 14px;
+}
+
+/* Mobile layout */
+
+@media (max-width: 420px) {
+  .face-tabs {
+    gap: 4px;
+  }
+
+  .control-panel .face-tab {
+    font-size: 10px;
+    padding: 6px 2px;
+  }
+
+  .color-palette {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sticker-grid {
+    max-width: 220px;
+  }
+
+  .editor-actions {
+    flex-direction: column;
+  }
+
+  .control-panel .editor-actions button {
+    width: 100%;
+  }
+}
