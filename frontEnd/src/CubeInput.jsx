@@ -2,6 +2,10 @@
 import { useState, useEffect } from "react";
 import "./CubeInput.css";
 
+// Backend configuration
+const API_BASE_URL = "https://cubelab-backend.onrender.com";
+const API = `${API_BASE_URL}/api`;
+
 const COLORS = [
   { id: "W", name: "White", hex: "#ffffff" },
   { id: "R", name: "Red", hex: "#ef4444" },
@@ -29,13 +33,6 @@ const SOLVED_CUBE = {
   back: Array(9).fill("O"),
 };
 
-// Use the deployed backend in production.
-// Fall back to localhost during local development.
-const API_BASE_URL =
-  import.meta.env.https://cubelab-backend.onrender.com || "http://localhost:8080";
-
-const API = `${API_BASE_URL.replace(/\/$/, "")}/api`;
-
 function copySolvedCube() {
   return Object.fromEntries(
     Object.entries(SOLVED_CUBE).map(([key, value]) => [
@@ -52,12 +49,14 @@ export default function CubeInput({ onResult, onFacesChange }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Keep the 3D cube synchronized with the editor.
+  // Synchronize manual input with the 3D cube.
   useEffect(() => {
     onFacesChange?.(faces);
   }, [faces, onFacesChange]);
 
+  // Update an individual sticker.
   function updateSticker(index) {
+    // Center stickers cannot be changed.
     if (index === 4) return;
 
     setFaces(previous => ({
@@ -68,15 +67,17 @@ export default function CubeInput({ onResult, onFacesChange }) {
     }));
 
     setError("");
-    onResult(null);
+    onResult?.(null);
   }
 
+  // Reset all six faces.
   function resetCube() {
     setFaces(copySolvedCube());
     setError("");
-    onResult(null);
+    onResult?.(null);
   }
 
+  // Count the occurrence of each color.
   function getColorCount() {
     const counts = Object.fromEntries(
       COLORS.map(color => [color.id, 0])
@@ -89,6 +90,7 @@ export default function CubeInput({ onResult, onFacesChange }) {
     return counts;
   }
 
+  // Send the cube configuration to Spring Boot.
   async function solveManualCube() {
     const counts = getColorCount();
 
@@ -108,8 +110,9 @@ export default function CubeInput({ onResult, onFacesChange }) {
 
     setLoading(true);
     setError("");
-    onResult(null);
+    onResult?.(null);
 
+    // Convert each face into a 3x3 matrix.
     const payload = Object.fromEntries(
       Object.entries(faces).map(([face, stickers]) => [
         face,
@@ -126,23 +129,42 @@ export default function CubeInput({ onResult, onFacesChange }) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Accept": "application/json",
         },
         body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
+      // Handle both JSON and plain-text backend responses.
+      const responseText = await response.text();
 
-      if (!response.ok) {
-        throw new Error(data.error || "Unable to solve cube.");
+      let data;
+
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        data = { error: responseText };
       }
 
-      onResult(data);
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+          data.message ||
+          `Backend error: ${response.status}`
+        );
+      }
+
+      onResult?.(data);
+
     } catch (err) {
-      setError(
-        err.message === "Failed to fetch"
-          ? "Cannot connect to the Java backend. Please try again."
-          : err.message
-      );
+      console.error("Cube solving API error:", err);
+
+      if (err.name === "TypeError") {
+        setError(
+          "Unable to reach the backend. Check the backend status and CORS configuration."
+        );
+      } else {
+        setError(err.message || "Unable to solve cube.");
+      }
     } finally {
       setLoading(false);
     }
@@ -150,10 +172,13 @@ export default function CubeInput({ onResult, onFacesChange }) {
 
   return (
     <div className="manual-editor">
+
+      {/* Face selection */}
       <div className="face-tabs">
         {FACES.map(face => (
           <button
             key={face.id}
+            type="button"
             className={
               activeFace === face.id
                 ? "face-tab active"
@@ -166,6 +191,7 @@ export default function CubeInput({ onResult, onFacesChange }) {
         ))}
       </div>
 
+      {/* Active face heading */}
       <div className="editor-heading">
         <h3>
           {FACES.find(face => face.id === activeFace).label} Face
@@ -173,29 +199,37 @@ export default function CubeInput({ onResult, onFacesChange }) {
         <span>3 × 3 stickers</span>
       </div>
 
+      {/* 3x3 sticker grid */}
       <div className="sticker-grid">
         {faces[activeFace].map((color, index) => {
-          const hex = COLORS.find(c => c.id === color).hex;
+          const hex = COLORS.find(
+            c => c.id === color
+          ).hex;
 
           return (
             <button
               key={index}
+              type="button"
               className="sticker"
               style={{ backgroundColor: hex }}
               onClick={() => updateSticker(index)}
-              disabled={index === 4}
+              disabled={index === 4 || loading}
               aria-label={`Sticker ${index + 1}: ${color}`}
             />
           );
         })}
       </div>
 
-      <p className="editor-label">Choose a sticker color</p>
+      {/* Color palette */}
+      <p className="editor-label">
+        Choose a sticker color
+      </p>
 
       <div className="color-palette">
         {COLORS.map(color => (
           <button
             key={color.id}
+            type="button"
             className={
               selectedColor === color.id
                 ? "palette-color selected"
@@ -203,15 +237,20 @@ export default function CubeInput({ onResult, onFacesChange }) {
             }
             onClick={() => setSelectedColor(color.id)}
             title={color.name}
+            disabled={loading}
           >
-            <span style={{ backgroundColor: color.hex }} />
+            <span
+              style={{ backgroundColor: color.hex }}
+            />
             {color.name}
           </button>
         ))}
       </div>
 
+      {/* Actions */}
       <div className="editor-actions">
         <button
+          type="button"
           className="secondary"
           onClick={resetCube}
           disabled={loading}
@@ -220,6 +259,7 @@ export default function CubeInput({ onResult, onFacesChange }) {
         </button>
 
         <button
+          type="button"
           className="primary"
           onClick={solveManualCube}
           disabled={loading}
@@ -228,9 +268,13 @@ export default function CubeInput({ onResult, onFacesChange }) {
         </button>
       </div>
 
+      {/* Error message */}
       {error && (
-        <p className="error" role="alert">{error}</p>
+        <p className="error" role="alert">
+          {error}
+        </p>
       )}
+
     </div>
   );
 }
