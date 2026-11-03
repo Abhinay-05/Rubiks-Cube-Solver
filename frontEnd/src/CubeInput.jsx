@@ -32,7 +32,7 @@ const SOLVED_CUBE = {
 // Use the deployed backend in production.
 // Fall back to localhost during local development.
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+  import.meta.env.https://cubelab-backend.onrender.com || "http://localhost:8080";
 
 const API = `${API_BASE_URL.replace(/\/$/, "")}/api`;
 
