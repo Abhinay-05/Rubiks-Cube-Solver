@@ -1,108 +1,171 @@
 
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import CubeScene from "./CubeScene";
+import CubeInput from "./CubeInput";
+import MoveNotation from "./MoveNotation";
 import "./App.css";
+import Watermark from "./components/Watermark";
 
-const API = "http://localhost:8080/api";
+const INITIAL_MOVE_STATUS = {
+  status: "idle",
+  move: null,
+  progress: 0,
+  step: 0,
+};
 
-const MOVES = [
-  "U", "U'", "U2",
-  "D", "D'", "D2",
-  "L", "L'", "L2",
-  "R", "R'", "R2",
-  "F", "F'", "F2",
-  "B", "B'", "B2",
-];
+function getMoveDetails(move) {
+  if (!move) return null;
 
-function generateScramble(length = 20) {
-  const result = [];
+  const faceNames = {
+    R: "Right",
+    L: "Left",
+    U: "Up",
+    D: "Down",
+    F: "Front",
+    B: "Back",
+  };
 
-  while (result.length < length) {
-    const move = MOVES[Math.floor(Math.random() * MOVES.length)];
+  const modifier = move.slice(1);
 
-    if (
-      result.length === 0 ||
-      result[result.length - 1][0] !== move[0]
-    ) {
-      result.push(move);
-    }
+  let direction = "Clockwise";
+  let angle = "90°";
+
+  if (modifier === "'") {
+    direction = "Anticlockwise";
+  } else if (modifier === "2") {
+    direction = "Half turn";
+    angle = "180°";
   }
 
-  return result.join(" ");
+  return {
+    face: faceNames[move[0]] || "Unknown",
+    direction,
+    angle,
+  };
 }
 
 export default function App() {
-  const [scramble, setScramble] = useState("");
-  const [solution, setSolution] = useState([]);
+  const [manualResult, setManualResult] = useState(null);
+  const [customFaces, setCustomFaces] = useState(null);
   const [step, setStep] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [verified, setVerified] = useState(false);
+  const [moveStatus, setMoveStatus] = useState(
+    INITIAL_MOVE_STATUS
+  );
 
-  async function solveCube() {
-    if (!scramble.trim()) {
-      setError("Enter a scramble or generate a random one.");
-      return;
-    }
+  const currentSolution = manualResult?.moves || [];
+  const totalMoves = currentSolution.length;
 
-    setLoading(true);
-    setError("");
-    setSolution([]);
+  const isCompleted =
+    totalMoves > 0 && step === totalMoves;
+
+  const selectedMove =
+    totalMoves > 0
+      ? currentSolution[Math.min(step, totalMoves - 1)]
+      : null;
+
+  const displayedMove =
+    moveStatus.status === "animating" ||
+    moveStatus.status === "completed" ||
+    moveStatus.status === "finished"
+      ? moveStatus.move
+      : selectedMove;
+
+  const moveDetails = getMoveDetails(displayedMove);
+
+  const handleMoveStatusChange = useCallback((status) => {
+    setMoveStatus(status);
+  }, []);
+
+  const handleManualResult = useCallback((data) => {
+    setManualResult(data);
     setStep(0);
-    setVerified(false);
+    setMoveStatus(INITIAL_MOVE_STATUS);
+  }, []);
 
-    try {
-      const response = await fetch(`${API}/solve`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          scramble: scramble.trim(),
-        }),
-      });
+  const handleFacesChange = useCallback((faces) => {
+    setCustomFaces(faces);
+    setManualResult(null);
+    setStep(0);
+    setMoveStatus(INITIAL_MOVE_STATUS);
+  }, []);
 
-      if (!response.ok) {
-        const message = await response.text();
-        throw new Error(
-          message || `Server error: ${response.status}`
-        );
+  function resetPlayback() {
+    setMoveStatus(INITIAL_MOVE_STATUS);
+    setStep(0);
+  }
+
+  function previousMove() {
+    setStep((current) => Math.max(0, current - 1));
+  }
+
+  function nextMove() {
+    setStep((current) => Math.min(totalMoves, current + 1));
+  }
+
+  function goToMove(index) {
+    setStep(index + 1);
+  }
+
+  // KEYBOARD CONTROLS
+  useEffect(() => {
+    function handleKeyDown(event) {
+      const target = event.target;
+      const tagName = target?.tagName?.toLowerCase();
+
+      // Don't interfere with typing in form fields
+      if (
+        ["input", "textarea", "select"].includes(tagName) ||
+        target?.isContentEditable
+      ) {
+        return;
       }
 
-      const data = await response.json();
-
-      if (!Array.isArray(data.moves)) {
-        throw new Error("Invalid solution received from the backend.");
+      // Ignore keyboard shortcuts with modifier keys
+      if (event.ctrlKey || event.altKey || event.metaKey) {
+        return;
       }
 
-      setSolution(data.moves);
-      setVerified(data.solved === true);
-    } catch (err) {
-      setError(
-        err.message === "Failed to fetch"
-          ? "Cannot connect to Spring Boot. Check that it is running on port 8080."
-          : err.message
-      );
-    } finally {
-      setLoading(false);
+      // Only enable shortcuts when a solution exists
+      if (!manualResult || totalMoves === 0) {
+        return;
+      }
+
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        previousMove();
+      }
+
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        nextMove();
+      }
     }
-  }
 
-  function createScramble() {
-    setScramble(generateScramble());
-    setSolution([]);
-    setStep(0);
-    setVerified(false);
-    setError("");
-  }
+    window.addEventListener("keydown", handleKeyDown);
 
-  function reset() {
-    setScramble("");
-    setSolution([]);
-    setStep(0);
-    setVerified(false);
-    setError("");
-  }
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [manualResult, totalMoves]);
+
+  const trackerStatus =
+    moveStatus.status === "animating"
+      ? "In progress"
+      : moveStatus.status === "finished"
+      ? "Solved"
+      : moveStatus.status === "completed"
+      ? "Move completed"
+      : isCompleted
+      ? "Completed"
+      : "Ready";
+
+  const trackerProgress =
+    moveStatus.status === "animating"
+      ? moveStatus.progress
+      : moveStatus.status === "completed" ||
+        moveStatus.status === "finished"
+      ? 100
+      : 0;
 
   return (
     <main className="app">
@@ -122,12 +185,13 @@ export default function App() {
         <p className="eyebrow">INTERACTIVE CUBE SOLVER</p>
 
         <h1>
-          Scramble. Solve. <span>Understand.</span>
+          Enter. Solve. <span>Understand.</span>
         </h1>
 
         <p className="subtitle">
-          Explore your Rubik's Cube in 3D and solve it using
-          your Java solving engine.
+          Enter the colors of your physical Rubik's Cube,
+          generate a solution using your Java solving engine,
+          and watch every move in an interactive 3D environment.
         </p>
       </section>
 
@@ -136,131 +200,216 @@ export default function App() {
           <p className="eyebrow">3D VIEWPORT</p>
           <h2>Your cube</h2>
 
-          <CubeScene />
+          <CubeScene
+            scramble=""
+            solution={currentSolution}
+            step={step}
+            customFaces={customFaces}
+            onMoveStatusChange={handleMoveStatusChange}
+          />
 
           <p className="hint">
             Drag to rotate the view. Scroll to zoom.
           </p>
+
+          {totalMoves > 0 && (
+            <div className="viewer-progress">
+              <div className="progress-label">
+                <span>Playback progress</span>
+                <span>
+                  {step} / {totalMoves} moves
+                </span>
+              </div>
+
+              <div className="progress-track">
+                <div
+                  className="progress-fill"
+                  style={{
+                    width: `${(step / totalMoves) * 100}%`,
+                  }}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="control-panel">
           <p className="eyebrow">SOLVER CONTROLS</p>
-          <h2>Solve your cube</h2>
+          <h2>Enter your cube</h2>
 
-          <label htmlFor="scramble">Scramble notation</label>
+          <p className="hint intro-hint">
+            Enter the colors of all six faces of your physical
+            Rubik's Cube. Select a face and click its stickers
+            to change their colors. The 3D model updates as you
+            enter the colors.
+          </p>
 
-          <textarea
-            id="scramble"
-            rows={4}
-            value={scramble}
-            onChange={(event) => setScramble(event.target.value)}
-            placeholder="R U R' U' F2 D ..."
-            disabled={loading}
+          <CubeInput
+            onResult={handleManualResult}
+            onFacesChange={handleFacesChange}
           />
 
-          <button
-            className="secondary"
-            onClick={createScramble}
-            disabled={loading}
-          >
-            Random scramble
-          </button>
+          {manualResult && (
+            <div className="solution">
+              <div className="solution-heading">
+                <div>
+                  <h3>Solution found!</h3>
 
-          <button
-            className="primary"
-            onClick={solveCube}
-            disabled={loading}
-          >
-            {loading ? "Solving..." : "Solve cube →"}
-          </button>
+                  <p className="success-message">
+                    {manualResult.solved
+                      ? "✓ Verified by your Java solver"
+                      : "Solution returned by your Java solver"}
+                  </p>
+                </div>
 
-          <button
-            className="secondary"
-            onClick={reset}
-            disabled={loading}
-          >
-            Reset
-          </button>
+                <span className="move-count">
+                  {manualResult.moveCount} moves
+                </span>
+              </div>
 
-          {error && (
-            <p className="error" role="alert">
-              {error}
-            </p>
-          )}
+              {/* LIVE CURRENT MOVE TRACKER */}
+              <div className="current-move-card">
+                <div className="current-move-top">
+                  <div>
+                    <p className="eyebrow">
+                      {moveStatus.status === "animating"
+                        ? "CURRENTLY ANIMATING"
+                        : "CURRENT MOVE"}
+                    </p>
 
-          <div className="solution">
-            <h3>Solution sequence</h3>
+                    <h3>
+                      {displayedMove || (isCompleted ? "✓" : "—")}
+                    </h3>
+                  </div>
 
-            {verified && (
-              <p className="success-message">
-                ✓ Solution verified by Java
-              </p>
-            )}
+                  <span
+                    className={`current-move-status ${
+                      moveStatus.status === "finished"
+                        ? "finished"
+                        : moveStatus.status === "animating"
+                        ? "in-progress"
+                        : ""
+                    }`}
+                  >
+                    {trackerStatus}
+                  </span>
+                </div>
 
-            {solution.length > 0 ? (
-              <>
-                <p className="hint">
-                  {solution.length} moves · Step {step} of {solution.length}
+                {moveDetails && (
+                  <div className="current-move-details">
+                    <span>{moveDetails.face} face</span>
+                    <span>{moveDetails.direction}</span>
+                    <span>{moveDetails.angle}</span>
+                  </div>
+                )}
+
+                <div className="tracker-progress-section">
+                  <div className="tracker-progress-label">
+                    <span>Move animation</span>
+                    <span>{trackerProgress}%</span>
+                  </div>
+
+                  <div className="tracker-progress-track">
+                    <div
+                      className="tracker-progress-fill"
+                      style={{
+                        width: `${trackerProgress}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <p className="current-move-counter">
+                  {moveStatus.status === "animating"
+                    ? `Animating move ${moveStatus.targetStep} of ${totalMoves}`
+                    : isCompleted
+                    ? "All moves completed successfully."
+                    : `Next solution step: ${step + 1} of ${totalMoves}`}
                 </p>
+              </div>
 
-                <div className="moves">
-                  {solution.map((move, index) => (
+              <p className="hint">
+                Click any move to jump to that step in the 3D animation.
+              </p>
+
+              <div className="moves">
+                {currentSolution.map((move, index) => {
+                  let className = "move";
+
+                  if (index < step) {
+                    className += " completed";
+                  }
+
+                  if (
+                    (step === 0 && index === 0) ||
+                    index === step - 1
+                  ) {
+                    className += " active";
+                  }
+
+                  return (
                     <button
-                      key={`${index}-${move}`}
-                      className={
-                        index < step
-                          ? "move completed"
-                          : index === step
-                            ? "move active"
-                            : "move"
-                      }
-                      onClick={() => setStep(index + 1)}
-                      disabled={loading}
+                      key={`${move}-${index}`}
+                      type="button"
+                      className={className}
+                      onClick={() => goToMove(index)}
+                      aria-label={`Go to move ${index + 1}: ${move}`}
                     >
                       {move}
                     </button>
-                  ))}
-                </div>
+                  );
+                })}
+              </div>
 
-                <div className="playback">
-                  <button
-                    className="secondary"
-                    onClick={() => setStep(Math.max(0, step - 1))}
-                    disabled={step === 0}
-                  >
-                    ← Previous
-                  </button>
+              <div className="playback">
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={resetPlayback}
+                  disabled={step === 0}
+                >
+                  ↺ Reset
+                </button>
 
-                  <button
-                    className="primary"
-                    onClick={() =>
-                      setStep(Math.min(solution.length, step + 1))
-                    }
-                    disabled={step === solution.length}
-                  >
-                    Next →
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={previousMove}
+                  disabled={step === 0}
+                >
+                  ← Previous
+                </button>
 
-                {step === solution.length && (
-                  <p className="success-message">
-                    Solution sequence completed!
-                  </p>
-                )}
-              </>
-            ) : (
-              <p className="hint">
-                Enter a scramble and click Solve cube to see
-                the solution returned by your Java solver.
+                <button
+                  type="button"
+                  className="primary"
+                  onClick={nextMove}
+                  disabled={step === totalMoves}
+                >
+                  Next →
+                </button>
+              </div>
+
+              {/* KEYBOARD SHORTCUT HINT */}
+              <p className="keyboard-hint">
+                Keyboard shortcuts: ← Previous move &nbsp; | &nbsp; → Next move
               </p>
-            )}
-          </div>
+
+              {isCompleted && (
+                <p className="success-message completion-message">
+                  ✓ Solution sequence completed!
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </section>
 
-      <footer>
-        Built with React, Three.js and Java
-      </footer>
+      <MoveNotation />
+
+      <Watermark />
+
+      <footer>Built with React, Three.js and Java</footer>
     </main>
   );
 }

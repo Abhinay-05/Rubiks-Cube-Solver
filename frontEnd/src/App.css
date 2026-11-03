@@ -1,3 +1,30 @@
+/* =====================================
+   GLOBAL APP STYLES
+===================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: #0b0d12;
+  color: #f3f4f6;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
 
 .app {
   width: min(100% - 40px, 1160px);
@@ -5,6 +32,10 @@
   padding: 0 0 24px;
   color: #f3f4f6;
 }
+
+/* =====================================
+   HEADER
+===================================== */
 
 .topbar {
   min-height: 76px;
@@ -49,6 +80,10 @@
   background: #34d399;
 }
 
+/* =====================================
+   HERO SECTION
+===================================== */
+
 .hero {
   padding: 44px 0 32px;
   text-align: center;
@@ -76,6 +111,10 @@
   line-height: 1.7;
 }
 
+/* =====================================
+   MAIN WORKSPACE
+===================================== */
+
 .workspace {
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
@@ -99,12 +138,20 @@
   line-height: 1.35;
 }
 
+/* =====================================
+   3D CUBE VIEWPORT
+===================================== */
+
 .cube-canvas {
   width: 100%;
   height: 380px;
   overflow: hidden;
   border-radius: 12px;
-  background: radial-gradient(ellipse, #202433, #11141c 72%);
+  background: radial-gradient(
+    ellipse,
+    #202433,
+    #11141c 72%
+  );
 }
 
 .hint {
@@ -113,6 +160,50 @@
   font-size: 13px;
   line-height: 1.7;
 }
+
+.intro-hint {
+  margin-bottom: 18px;
+}
+
+/* =====================================
+   VIEWER PROGRESS
+===================================== */
+
+.viewer-progress {
+  margin-top: 20px;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 9px;
+  color: #aeb5c3;
+  font-size: 12px;
+}
+
+.progress-track {
+  width: 100%;
+  height: 7px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #292d39;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 20px;
+  background: linear-gradient(
+    90deg,
+    #8b5cf6,
+    #a78bfa
+  );
+  transition: width 0.3s ease;
+}
+
+/* =====================================
+   CONTROL PANEL
+===================================== */
 
 .control-panel label {
   display: block;
@@ -139,6 +230,10 @@
   border-color: #a78bfa;
 }
 
+/* =====================================
+   BUTTONS
+===================================== */
+
 .control-panel button {
   width: 100%;
   min-height: 44px;
@@ -147,7 +242,10 @@
   border-radius: 9px;
   font-size: 13px;
   font-weight: 700;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
 }
 
 .control-panel button.primary {
@@ -158,6 +256,7 @@
 
 .control-panel button.primary:hover:not(:disabled) {
   background: #b7a1ff;
+  transform: translateY(-1px);
 }
 
 .control-panel button.secondary {
@@ -170,6 +269,10 @@
   background: #272b39;
 }
 
+/* =====================================
+   SOLUTION SECTION
+===================================== */
+
 .solution {
   margin-top: 26px;
   padding-top: 20px;
@@ -179,6 +282,23 @@
 .solution h3 {
   margin: 0 0 12px;
   font-size: 17px;
+}
+
+.solution-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.move-count {
+  flex-shrink: 0;
+  padding: 7px 11px;
+  border-radius: 20px;
+  color: #c4b5fd;
+  background: rgba(167, 139, 250, 0.12);
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .success-message {
@@ -193,6 +313,10 @@
   line-height: 1.6;
   overflow-wrap: anywhere;
 }
+
+/* =====================================
+   SOLUTION MOVE BUTTONS
+===================================== */
 
 .moves {
   display: flex;
@@ -212,6 +336,10 @@
   border: 1px solid #343849;
 }
 
+.control-panel .move:hover {
+  border-color: #a78bfa;
+}
+
 .control-panel .move.active {
   color: #171323;
   background: #a78bfa;
@@ -223,6 +351,10 @@
   border-color: #276854;
 }
 
+/* =====================================
+   PLAYBACK CONTROLS
+===================================== */
+
 .playback {
   display: flex;
   gap: 10px;
@@ -233,11 +365,220 @@
   width: auto;
 }
 
+.completion-message {
+  margin-top: 16px;
+}
+
+/* =====================================
+   CURRENT MOVE INDICATOR
+===================================== */
+
+.current-move-card {
+  margin: 20px 0;
+  padding: 18px;
+  border: 1px solid rgba(139, 156, 255, 0.25);
+  border-radius: 14px;
+  background: rgba(139, 156, 255, 0.06);
+}
+
+.current-move-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.current-move-top h3 {
+  margin: 6px 0 0;
+  font-size: 30px;
+  color: #a5b4fc;
+}
+
+.current-move-status {
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: rgba(139, 156, 255, 0.12);
+  color: #a5b4fc;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.current-move-status.finished {
+  color: #6ee7b7;
+  background: rgba(52, 211, 153, 0.12);
+}
+
+.current-move-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.current-move-details span {
+  padding: 7px 10px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #d1d5db;
+  font-size: 12px;
+}
+
+.current-move-counter {
+  margin: 14px 0 0;
+  color: #9299a8;
+  font-size: 12px;
+}
+
+/* =====================================
+   MOVE NOTATION GUIDE
+===================================== */
+
+.notation-guide {
+  margin-top: 28px;
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.notation-guide-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.notation-guide-heading h3 {
+  margin: 5px 0 0;
+  font-size: 20px;
+}
+
+.notation-guide-caption {
+  font-size: 12px;
+  color: #9299a8;
+}
+
+.notation-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.notation-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.notation-symbol {
+  font-size: 24px;
+  font-weight: 700;
+  color: #8b9cff;
+}
+
+.notation-face {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+.notation-action {
+  font-size: 11px;
+  color: #9299a8;
+}
+
+.notation-modifiers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.notation-modifier {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  background: rgba(139, 156, 255, 0.07);
+}
+
+.notation-modifier code {
+  font-size: 18px;
+  font-weight: 700;
+  color: #a5b4fc;
+}
+
+.notation-modifier span {
+  font-size: 12px;
+  color: #b7bdca;
+}
+
+.notation-footnote {
+  margin: 18px 0 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #9299a8;
+}
+
+/* =====================================
+   FOOTER
+===================================== */
+
 footer {
   padding: 30px 0 8px;
   color: #6b7280;
   font-size: 12px;
   text-align: center;
+}
+
+/* =====================================
+   INPUT MODE TABS
+===================================== */
+
+.input-mode-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 5px;
+  background: #0b0d12;
+  border: 1px solid #343849;
+  border-radius: 10px;
+}
+
+.control-panel .input-mode-tabs button {
+  margin: 0;
+  padding: 10px 5px;
+  color: #9ca3af;
+  background: transparent;
+  border: 1px solid transparent;
+  font-size: 12px;
+}
+
+.control-panel .input-mode-tabs button.mode-active {
+  color: #171323;
+  background: #a78bfa;
+  border-color: #a78bfa;
+}
+
+/* =====================================
+   RESPONSIVE DESIGN
+===================================== */
+
+@media (max-width: 900px) {
+  .workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cube-canvas {
+    height: 380px;
+  }
 }
 
 @media (max-width: 760px) {
@@ -249,10 +590,6 @@ footer {
     padding: 32px 0 26px;
   }
 
-  .workspace {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
   .cube-panel,
   .control-panel {
     padding: 18px;
@@ -261,9 +598,22 @@ footer {
   .cube-canvas {
     height: 320px;
   }
+
+  .notation-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .notation-guide-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .notation-modifiers {
+    grid-template-columns: 1fr;
+  }
 }
 
-@media (max-width: 420px) {
+@media (max-width: 480px) {
   .topbar {
     min-height: 64px;
   }
@@ -279,4 +629,127 @@ footer {
   .hero h1 {
     font-size: 31px;
   }
+
+  .playback {
+    flex-wrap: wrap;
+  }
+
+  .control-panel .playback button {
+    min-width: 100px;
+  }
+
+  .current-move-top h3 {
+    font-size: 26px;
+  }
+
+  .notation-guide {
+    padding: 16px;
+  }
+
+  .notation-grid {
+    gap: 8px;
+  }
+
+  .notation-item {
+    padding: 11px;
+  }
+}
+/* ================================
+   LIVE CURRENT MOVE TRACKER
+================================ */
+
+.current-move-card {
+  margin: 20px 0;
+  padding: 20px;
+  border: 1px solid rgba(139, 156, 255, 0.25);
+  border-radius: 14px;
+  background: rgba(139, 156, 255, 0.06);
+}
+
+.current-move-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.current-move-top h3 {
+  margin: 6px 0 0;
+  font-size: 32px;
+  color: #a5b4fc;
+}
+
+.current-move-status {
+  padding: 7px 12px;
+  border-radius: 20px;
+  background: rgba(139, 156, 255, 0.12);
+  color: #a5b4fc;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.current-move-status.in-progress {
+  color: #fcd34d;
+  background: rgba(251, 191, 36, 0.12);
+}
+
+.current-move-status.finished {
+  color: #6ee7b7;
+  background: rgba(52, 211, 153, 0.12);
+}
+
+.current-move-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.current-move-details span {
+  padding: 7px 10px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #d1d5db;
+  font-size: 12px;
+}
+
+.tracker-progress-section {
+  margin-top: 20px;
+}
+
+.tracker-progress-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 9px;
+  color: #aeb5c3;
+  font-size: 12px;
+}
+
+.tracker-progress-track {
+  width: 100%;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #292d39;
+}
+
+.tracker-progress-fill {
+  height: 100%;
+  border-radius: 20px;
+  background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+  transition: width 0.12s ease;
+}
+
+.current-move-counter {
+  margin: 14px 0 0;
+  color: #9299a8;
+  font-size: 12px;
+}
+
+.keyboard-hint {
+  margin-top: 14px;
+  color: #9299a8;
+  font-size: 11px;
+  text-align: center;
 }
