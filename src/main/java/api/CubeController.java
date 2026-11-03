@@ -25,4 +25,9 @@ public class CubeController {
     public String health() {
         return "Rubik's Cube Solver API is running";
     }
+
+    @PostMapping("/solve-cube")
+    public ManualSolveResponse solveManualCube(@RequestBody CubeInputRequest request){
+        return cubeService.solveManualCube(request);
+    }
 }
